@@ -84,7 +84,7 @@ foreach($output as $key => $value) {
 	];
 }
 
-print "<h3>Bugs that causes regressions in" . secureText($version) . "</h3>
+print "<h3>Bugs that causes regressions in " . secureText($version) . "</h3>
 <table class='pure-table pure-table-bordered'>
 <thead>
 <tr><th>#</th><th>Bug</th></tr>\n
