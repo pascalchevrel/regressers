@@ -42,20 +42,26 @@ function secureText($string)
 
 $cache_source = 'https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status&bug_status=UNCONFIRMED&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&bug_status=RESOLVED&bug_status=VERIFIED&classification=Client%20Software&classification=Developer%20Infrastructure&classification=Components&classification=Server%20Software&classification=Other&f1=cf_status_firefox' . $version .'&f2=blocked&keywords=regression&keywords_type=allwords&o1=anyexact&o2=isnotempty&resolution=---&resolution=FIXED&v1=affected%2Cfixed%2Cwontfix';
 
-$regressions = json_decode(get_cache($cache_source, 'regressions_' . $version . '.json'), true);
+$regressions = json_decode(get_cache(
+		$cache_source,
+		'regressions_' . $version . '.json')
+	, true);
 $regressions = array_column($regressions['bugs'], 'id');
 $regressions = implode(',', $regressions);
 
-$regresser_list = json_decode(get_cache('https://bugzilla.mozilla.org/rest/bug?id=' . $regressions . '&include_fields=blocks', 'regresserslist_' . $version . '.json'), true)['bugs'];
+$regressions = json_decode(get_cache(
+	'https://bugzilla.mozilla.org/rest/bug?id=' . $regressions . '&include_fields=blocks',
+	'regresserslist_' . $version . '.json')
+	, true)['bugs'];
 
 
 $output = [];
-foreach ($regresser_list as $data) {
+foreach ($regressions as $data) {
 	if (! isset($data['blocks'])) {
 		continue;
 	}
 	foreach ($data['blocks'] as $bug_number) {
-		if (! isset($output[$bug_number])) {
+		if (! array_key_exists($bug_number, $output)) {
 			$output[$bug_number] = 1;
 		} else {
 			$output[$bug_number]++;
@@ -68,19 +74,27 @@ $regressers = json_decode(
 	get_cache(
 		'https://bugzilla.mozilla.org/rest/bug?id='
 		. implode(',', array_keys($output))
-		. '&include_fields=id,summary', 'regressers_'
-		. $version
-		. '.json')
+		. '&include_fields=id,summary',
+		'regressers_with_summary_' . $version . '.json')
 	, true)['bugs'];
+
 
 
 $final = [];
 
 foreach($output as $key => $value) {
+	$public_bug = array_search($key, array_column($regressers, 'id'));
+
+	if (! $public_bug) {
+		$summary = 'Sec bug';
+	} else {
+		$summary = $regressers[$public_bug]['summary'];
+	}
+
 	$final[] = [
 		'bug' 		=> $key,
-		'summary' 	=> $regressers[array_search($key, array_column($regressers, 'id'))]['summary'],
-		'count' 	=> $output[$key]
+		'summary' 	=> $summary,
+		'count' 	=> $value
 	];
 }
 
@@ -94,7 +108,7 @@ print "<h3>Bugs that causes regressions in " . secureText($version) . "</h3>
 foreach($final as $values) {
 	print "<tr>\n";
 	print '<td>' . $values['count'] ."</td>\n";
-	print '<td><a href="https://bugzilla.mozilla.org/' . secureText($values['bug']) . '">' . secureText($values['bug']) . '</a> - ' . $values['summary'] . "</td>\n";
+	print '<td><a href="https://bugzilla.mozilla.org/' . secureText($values['bug']) . '">' . secureText($values['bug']) . '</a> - ' . secureText($values['summary']) . "</td>\n";
 	print "</tr>\n";
 }
 print "</tbody>\n</table>";
