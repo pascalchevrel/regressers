@@ -40,7 +40,7 @@ function secureText($string)
         return is_array($string) ? array_map($sanitize, $string) : $sanitize($string);
     }
 
-$cache_source = 'https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status&bug_status=UNCONFIRMED&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&bug_status=RESOLVED&bug_status=VERIFIED&classification=Client%20Software&classification=Developer%20Infrastructure&classification=Components&classification=Server%20Software&classification=Other&f1=cf_status_firefox' . $version .'&f2=blocked&keywords=regression&keywords_type=allwords&o1=anyexact&o2=isnotempty&resolution=---&resolution=FIXED&v1=affected%2Cfixed%2Cwontfix';
+$cache_source = 'https://bugzilla.mozilla.org/rest/bug?include_fields=id,summary,status&bug_status=UNCONFIRMED&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&bug_status=RESOLVED&bug_status=VERIFIED&classification=Client%20Software&classification=Developer%20Infrastructure&classification=Components&classification=Server%20Software&classification=Other&f1=cf_status_firefox' . $version .'&f2=blocked&keywords=regression&keywords_type=allwords&o1=anyexact&o2=isnotempty&resolution=---&resolution=FIXED&v1=affected%2Cfixed%2Cwontfix%2Cverified';
 
 $regressions = json_decode(get_cache(
 		$cache_source,
