@@ -9,7 +9,7 @@
 
 <?php
 
-$version = isset($_GET['release']) ? (int) $_GET['release'] : 65;
+$version = isset($_GET['release']) ? (int) $_GET['release'] : 67;
 
 function get_cache($cache_source, $cache_file, $cache_time=10800) {
 	// Serve from cache if it is younger than $cache_time
